@@ -23,6 +23,7 @@ const getPostData = (req) => {
     }
     let postData = ''
     req.on('data', chunk => {
+      console.log(chunk)
       postData += chunk.toString()
     })
     req.on('end', () => {
@@ -101,6 +102,7 @@ const serverHandle = (req, res) => {
     //  处理post data
     return getPostData(req)
   }).then(postData => {
+    console.log(postData)
     req.body = postData
 
     // 处理路由（先处理post data，因为其异步）
