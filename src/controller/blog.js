@@ -22,7 +22,7 @@ const getDetail = (id) => {
 
 const newBlog = (blogData={}) => {
   let {title,content,author} = blogData
-  title = xss(title)
+  title = xss(title)  //  防止xss攻击示例
   const createTime = Date.now()
   const sql = `
   insert into blogs (title,content,createtime,author)

@@ -17,7 +17,7 @@ const handleBlogRouter = (req, res) => {
   if(method === 'GET' && req.path === '/api/blog/list') {
     let author = req.query.author || ''
     const keyword = req.query.keyword || ''
-    if (req.query.isadmin) {  // ?
+    if (req.query.isadmin) {  
       const loginCheckResult = loginCheck(req);
       if (loginCheckResult) {
         // 未登录

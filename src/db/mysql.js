@@ -8,7 +8,6 @@ con.connect()
 
 function exec(sql) {
   const promise = new Promise((res, rej) => {
-    console.log(sql)
     con.query(sql, (err, result) => {
       if(err) {
         rej(err)

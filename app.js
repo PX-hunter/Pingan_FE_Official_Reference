@@ -4,12 +4,6 @@ const handleUserRouter = require('./src/router/user')
 const { get, set } = require('./src/db/redis')
 const { access } = require('./src/utils/log')
 
-/*
-session数据
-const SESSION_DATA = {}
-*/ 
-
-
 //  用于处理post data
 const getPostData = (req) => {
   const promise = new Promise((res, rej) => {
@@ -38,19 +32,15 @@ const getPostData = (req) => {
 }
 
 const serverHandle = (req, res) => {
-  // 纪录access log
+  //  纪录access log
   access(`${req.method}---${req.url}---${req.headers['user-agent']}`)
-
-  //  设置返回格式
+  //  返回格式
   res.setHeader('Content-type', 'application/json')
-
   //  获取path
   const url = req.url
   req.path = url.split('?')[0]
-
-  //  解析query：全局的处理都放在app.js
+  //  解析query
   req.query = querystring.parse(url.split('?')[1])
-
   // 解析cookie
   req.cookie = {}
   const cookieStr = req.headers.cookie || ''
@@ -64,23 +54,8 @@ const serverHandle = (req, res) => {
     req.cookie[key] = val 
   })
 
-  /*
-  解析session
-  let needSetCookie = false     //    如果没有useId，不仅需要设置SESSION_DATA[userId] = userId，还需要同步到cookie中，需要一个变量控制  
-  let userId = req.cookie.userid
-  if(userId) {
-    if(!SESSION_DATA[userId]) {
-      SESSION_DATA[userId] = {}
-    }
-  } else {
-    needSetCookie = true
-    userId = `${Date.now()}_${Math.random()}`
-    SESSION_DATA[userId] = {}
-  }
-  req.session = SESSION_DATA[userId]
-  */ 
   //  解析session（使用redis）
-  let needSetCookie = false
+  let needSetCookie = false   //  若不存在userId，需要动态生成存入session，并且同步至cookie中
   let userId = req.cookie.userid
   if(!userId) {
     needSetCookie = true
@@ -104,16 +79,8 @@ const serverHandle = (req, res) => {
   }).then(postData => {
     console.log(postData)
     req.body = postData
-
-    // 处理路由（先处理post data，因为其异步）
-    // const blogData = handleBlogRouter(req, res);
-    // if (blogData) {
-    //   res.end(JSON.stringify(blogData));
-    //   return;
-    // }
-    // 异步查询数据库
     const blogResult = handleBlogRouter(req, res)
-    if(blogResult) {
+    if(blogResult) {  //  防止网络异常
       if(needSetCookie){
         res.setHeader(
           "Set-Cookie",
@@ -127,14 +94,6 @@ const serverHandle = (req, res) => {
       })
       return
     }
-    
-    // const userData = handleUserRouter(req, res)
-    // if (userData) {
-    //   res.end(
-    //     JSON.stringify(userData)
-    //   )
-    //   return
-    // }
     const userResult = handleUserRouter(req, res);
     if(userResult) {
       if (needSetCookie) {
